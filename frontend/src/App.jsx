@@ -15,6 +15,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import BookDetails from "./components/BookDetails";
 import Cart from "./components/Cart";
 import Confirmation from "./components/Confirmation";
+import SearchPage from "./components/SearchPage";
 
 const ProtectedRoute = ({ user, role, children }) => {
   if (!user) return <Navigate to="/login" replace />;
@@ -67,6 +68,7 @@ export default function App() {
           <Route path="add-book/:id" element={<AddBook user={user} />} />
         </Route>
         <Route path="/book/:id" element={<BookDetails user={user} />} />
+        <Route path="/search" element={<SearchPage />} />
       </Routes>
     </BrowserRouter>
   );

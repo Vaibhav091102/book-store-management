@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import NavBar from "./NavBar";
+import NavBar from "./NavBarB";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import axios from "axios";

@@ -90,12 +90,12 @@ router.get("/:id", async (req, res) => {
 });
 
 // Remove item from cart
-router.delete("/clear/:userId", async (req, res) => {
+router.delete("/clear/:userId/:bookId", async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { userId, bookId } = req.params;
     const cart = await Cart.findOneAndUpdate(
       { userId },
-      { $pull: { items: {} } },
+      { $pull: { items: { bookId: bookId } } },
       { new: true }
     );
 

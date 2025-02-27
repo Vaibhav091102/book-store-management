@@ -53,7 +53,7 @@ export default function Cart({ user }) {
   // Remove item from cart
   const handleRemove = (bookId) => {
     axios
-      .delete(`http://localhost:5000/api/cart/remove/${user._id}/${bookId}`)
+      .delete(`http://localhost:5000/api/cart/clear/${user._id}/${bookId}`)
       .then(() => {
         setCartItems((prevItems) =>
           prevItems.filter((item) => item.bookId._id !== bookId)
@@ -130,6 +130,7 @@ export default function Cart({ user }) {
                   <td>
                     <Button
                       variant="outline-secondary"
+                      size="sm"
                       onClick={() => handleQuantityChange(item.bookId._id, -1)}
                       disabled={item.quantity === 1}
                     >
@@ -138,6 +139,7 @@ export default function Cart({ user }) {
                     <span className="mx-2">{item.quantity}</span>
                     <Button
                       variant="outline-secondary"
+                      size="sm"
                       onClick={() => handleQuantityChange(item.bookId._id, 1)}
                     >
                       +

@@ -7,7 +7,11 @@ const NavBar = ({ user }) => {
       <NavLink className="navbar-brand d-flex align-items-center" to="/seller">
         QuickKart
       </NavLink>
+
       <div className="ms-auto">
+        <NavLink to="/search" className="btn btn-outline-light me-2">
+          🔍
+        </NavLink>
         <NavLink to="mybook" className="btn btn-outline-light me-2">
           My Book
         </NavLink>

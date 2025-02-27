@@ -50,6 +50,25 @@ app.get("/api/product", async (req, res) => {
   }
 });
 
+// Fetch books only when a search query is provided
+app.get("/api/books", async (req, res) => {
+  try {
+    const searchQuery = req.query.search || "";
+    if (!searchQuery) return res.json([]); // Return empty array if no query
+
+    const books = await Product.find({
+      $or: [
+        { name: { $regex: searchQuery, $options: "i" } }, // Case-insensitive search
+        { author: { $regex: searchQuery, $options: "i" } },
+      ],
+    });
+
+    res.json(books);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching books" });
+  }
+});
+
 app.use("/api/products", router);
 
 app.use("/api/profile", profile);

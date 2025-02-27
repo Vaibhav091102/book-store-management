@@ -10,6 +10,10 @@ export default function NavBar({ user }) {
       <div className="ms-auto">
         {user && (
           <>
+            {" "}
+            <NavLink to="/search" className="btn btn-outline-light me-2">
+              🔍
+            </NavLink>
             <NavLink to="/buyer/cart" className="btn btn-outline-light m-2">
               Cart
             </NavLink>

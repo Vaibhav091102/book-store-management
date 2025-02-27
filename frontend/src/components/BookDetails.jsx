@@ -4,6 +4,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Button } from "react-bootstrap";
+import NavBarB from "../buyer/NavBarB";
+import NavBar from "../Seller/NavBar";
 
 const BookDetails = ({ user }) => {
   const { id } = useParams();
@@ -41,42 +43,45 @@ const BookDetails = ({ user }) => {
   }
 
   return (
-    <div className="container mt-5">
-      <div className="row m-1">
-        {/* Left Side - Image & Book Name */}
-        <div className="col-md-6 d-flex flex-column align-items-start">
-          <img
-            src={`http://localhost:5000/${book.image.replace(/\\/g, "/")}`}
-            alt={book.name}
-            className="img-fluid rounded shadow mb-3"
-            style={{ maxHeight: "400px", objectFit: "cover" }}
-          />
-          <h2>{book.name || "Unknown Title"}</h2>
-        </div>
+    <>
+      {user.role === "buyer" ? <NavBarB /> : <NavBar />}
+      <div className="container mt-5">
+        <div className="row m-1">
+          {/* Left Side - Image & Book Name */}
+          <div className="col-md-6 d-flex flex-column align-items-start">
+            <img
+              src={`http://localhost:5000/${book.image.replace(/\\/g, "/")}`}
+              alt={book.name}
+              className="img-fluid rounded shadow mb-3"
+              style={{ maxHeight: "400px", objectFit: "cover" }}
+            />
+            <h2>{book.name || "Unknown Title"}</h2>
+          </div>
 
-        {/* Right Side - Details */}
-        <div className="col-md-6">
-          <p className="text-muted">by {book.author || "Unknown Author"}</p>
-          <h4 className="text-success">₹{book.price || "N/A"}</h4>
-          <p>
-            <strong>Publisher:</strong> {book.publisher}
-          </p>
-          <p>
-            <strong>Published Year:</strong> {book.publishedYear}
-          </p>
-          <p>
-            <strong>Available Copies:</strong> {book.availableCopies}
-          </p>
-          <p className="mt-3">{book.summary}</p>
+          {/* Right Side - Details */}
+          <div className="col-md-6">
+            <p className="text-muted">by {book.author || "Unknown Author"}</p>
+            <h4 className="text-success">₹{book.price || "N/A"}</h4>
+            <p>
+              <strong>Publisher:</strong> {book.publisher}
+            </p>
+            <p>
+              <strong>Published Year:</strong> {book.publishedYear}
+            </p>
+            <p>
+              <strong>Available Copies:</strong> {book.availableCopies}
+            </p>
+            <p className="mt-3">{book.summary}</p>
 
-          {user && user.role === "buyer" && (
-            <Button variant="primary" onClick={() => handleAddToCart(book)}>
-              Add to Cart
-            </Button>
-          )}
+            {user && user.role === "buyer" && (
+              <Button variant="primary" onClick={() => handleAddToCart(book)}>
+                Add to Cart
+              </Button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
