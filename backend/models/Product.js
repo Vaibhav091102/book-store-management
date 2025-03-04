@@ -6,39 +6,43 @@ const productSchema = new mongoose.Schema(
       ref: "seller",
       required: true,
     },
-    name: {
-      type: String,
-      require: true,
-    },
-    author: {
-      type: String,
-      required: true,
-    },
+    books: [
+      {
+        name: {
+          type: String,
+          require: true,
+        },
+        author: {
+          type: String,
+          required: true,
+        },
 
-    price: {
-      type: Number,
-      require: true,
-    },
-    summary: {
-      type: String,
-    },
+        price: {
+          type: Number,
+          require: true,
+        },
+        summary: {
+          type: String,
+        },
 
-    publisher: {
-      type: String,
-      require: true,
-    },
-    publishedYear: {
-      type: Number,
-      require: true,
-    },
-    availableCopies: {
-      type: Number,
-      default: 1,
-    },
-    image: {
-      type: String,
-      require: true,
-    },
+        publisher: {
+          type: String,
+          require: true,
+        },
+        publishedYear: {
+          type: Number,
+          require: true,
+        },
+        availableCopies: {
+          type: Number,
+          default: 1,
+        },
+        image: {
+          type: String,
+          require: true,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

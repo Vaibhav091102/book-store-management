@@ -3,69 +3,86 @@ import { Button, Table } from "react-bootstrap";
 import axios from "axios";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
+import BackButton from "./BackButton";
 
 export default function Cart({ user }) {
   const [cartItems, setCartItems] = useState([]);
   const navigate = useNavigate(); // ✅ Initialize navigation
 
   const handleCheckout = async () => {
-    // Simulate purchase (you can later integrate payment)
-    setCartItems([]);
-    await axios.delete(`http://localhost:5000/api/cart/clear/${user._id}`);
-    navigate("/confirmation"); // ✅ Redirect to confirmation page
+    try {
+      await axios.delete(`http://localhost:5000/api/cart/clearall/${user._id}`);
+      setCartItems([]);
+      navigate("/confirmation"); // ✅ Redirect to confirmation page
+    } catch (error) {
+      console.error("Error during checkout:", error);
+    }
   };
 
   // Fetch cart items from backend
   useEffect(() => {
-    if (user) {
+    if (user?._id) {
       axios
         .get(`http://localhost:5000/api/cart/${user._id}`)
         .then((res) => {
-          setCartItems(res.data.items || []);
+          const formattedItems = Array.isArray(res.data.cart)
+            ? res.data.cart
+            : [];
+          setCartItems(formattedItems);
         })
         .catch((err) => console.error("Error fetching cart:", err));
     }
-  }, [user]);
+  }, [user?._id]);
+  console.log(cartItems);
 
-  // Handle quantity changes
-  const handleQuantityChange = async (bookId, delta) => {
+  //Quality change
+  const handleQuantityChange = async (bookId, delta, availableCopies) => {
     const updatedCartItems = cartItems.map((item) =>
-      item.bookId._id === bookId
-        ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+      item.bookId === bookId
+        ? {
+            ...item,
+            quantity: Math.min(
+              availableCopies,
+              Math.max(1, item.quantity + delta)
+            ),
+          }
         : item
     );
 
-    setCartItems(updatedCartItems); // Update UI first
+    setCartItems(updatedCartItems);
 
     try {
       await axios.put(
         `http://localhost:5000/api/cart/update/${user._id}/${bookId}`,
         {
-          quantity: updatedCartItems.find((item) => item.bookId._id === bookId)
-            .quantity,
+          quantity: updatedCartItems.find((item) => item.bookId === bookId)
+            ?.quantity,
         }
       );
     } catch (error) {
       console.error("Error updating quantity:", error);
+      alert(error.response?.data?.message || "Error updating quantity");
     }
   };
 
   // Remove item from cart
-  const handleRemove = (bookId) => {
-    axios
-      .delete(`http://localhost:5000/api/cart/clear/${user._id}/${bookId}`)
-      .then(() => {
-        setCartItems((prevItems) =>
-          prevItems.filter((item) => item.bookId._id !== bookId)
-        );
-      })
-      .catch((err) => console.error("Error removing item:", err));
+  const handleRemove = async (bookId) => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/cart/clear/${user._id}/${bookId}`
+      );
+      setCartItems((prevItems) =>
+        prevItems.filter((item) => item.book?._id !== bookId)
+      );
+    } catch (err) {
+      console.error("Error removing item:", err);
+    }
   };
 
-  // Calculate total
+  // Calculate total price
   const calculateTotal = () => {
     return cartItems.reduce(
-      (total, item) => total + item.bookId.price * item.quantity,
+      (total, item) => total + (item?.book?.price || 0) * (item?.quantity || 0),
       0
     );
   };
@@ -77,92 +94,123 @@ export default function Cart({ user }) {
   }
 
   return (
-    <div
-      className="cart-page-bg d-flex justify-content-center align-items-center"
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #f2f2f2, #c9d6ff)",
-        padding: "20px",
-      }}
-    >
-      <div className="cart-container bg-white p-4 rounded shadow-lg w-75">
-        <h2 className="text-center mb-4">Your Cart</h2>
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>Remove</th>
-              <th>Image</th>
-              <th>Name</th>
-              <th>Quantity</th>
-              <th>Price</th>
-              <th>Quality</th>
-              <th>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cartItems
-              .filter((item) => item.bookId) // ✅ Ensure `bookId` exists
-              .map((item) => (
-                <tr key={item.bookId?._id || Math.random()}>
-                  <td>
-                    <Button
-                      variant="danger"
-                      onClick={() => handleRemove(item.bookId._id)}
-                    >
-                      Remove
-                    </Button>
+    <>
+      <BackButton />
+      <div
+        className="cart-page-bg d-flex justify-content-center align-items-center"
+        style={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f2f2f2, #c9d6ff)",
+          padding: "20px",
+        }}
+      >
+        <div className="cart-container bg-white p-4 rounded shadow-lg w-75">
+          <h2 className="text-center mb-4">Your Cart</h2>
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Remove</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                {/* <th>Quality</th> */}
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cartItems.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center">
+                    Your cart is empty
                   </td>
-                  <td>
-                    {item.bookId?.image ? (
-                      <img
-                        src={`http://localhost:5000/${item.bookId.image.replace(
-                          /\\/g,
-                          "/"
-                        )}`}
-                        alt={item.bookId?.name || "Unknown Book"}
-                        width="80"
-                      />
-                    ) : (
-                      "No Image"
-                    )}
-                  </td>
-                  <td>{item.bookId?.name || "Unknown Book"}</td>
-                  <td>
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      onClick={() => handleQuantityChange(item.bookId._id, -1)}
-                      disabled={item.quantity === 1}
-                    >
-                      -
-                    </Button>
-                    <span className="mx-2">{item.quantity}</span>
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      onClick={() => handleQuantityChange(item.bookId._id, 1)}
-                    >
-                      +
-                    </Button>
-                  </td>
-                  <td>₹{item.bookId?.price || 0}</td>
-                  <td>{item.bookId?.quality || "N/A"}</td>
-                  <td>₹{(item.bookId?.price || 0) * item.quantity}</td>
                 </tr>
-              ))}
-          </tbody>
-        </Table>
+              ) : (
+                cartItems
+                  .filter((item) => item.bookId) // ✅ Ensure `bookId` exists
+                  .map((item) => (
+                    <tr key={item.book?._id || Math.random()}>
+                      <td>
+                        <Button
+                          variant="danger"
+                          onClick={() => handleRemove(item.book._id)}
+                        >
+                          Remove
+                        </Button>
+                      </td>
+                      <td>
+                        {item.book?.image ? (
+                          <img
+                            src={`http://localhost:5000/${item.book.image.replace(
+                              /\\/g,
+                              "/"
+                            )}`}
+                            alt={item.book?.name || "Unknown Book"}
+                            width="80"
+                          />
+                        ) : (
+                          "No Image"
+                        )}
+                      </td>
+                      <td>{item.book?.name || "Unknown Book"}</td>
+                      <td>
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() =>
+                            handleQuantityChange(
+                              item.book._id,
+                              -1,
+                              item.book.availableCopies
+                            )
+                          }
+                          disabled={item.quantity === 1}
+                        >
+                          -
+                        </Button>
+                        <span className="mx-2">{item.quantity}</span>
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() =>
+                            handleQuantityChange(
+                              item.book._id,
+                              1,
+                              item.book.availableCopies
+                            )
+                          }
+                          disabled={item.quantity >= item.book.availableCopies}
+                        >
+                          +
+                        </Button>
+                      </td>
+                      <td>₹{item.book?.price || 0}</td>
+                      {/* <td>{item.book?.quality || "N/A"}</td> */}
+                      <td>₹{(item.book?.price || 0) * item.quantity}</td>
+                    </tr>
+                  ))
+              )}
+            </tbody>
+          </Table>
 
-        <div className="text-end">
-          <h4>Total: ₹{calculateTotal()}</h4>
-          <Button variant="success" className="mt-3" onClick={handleCheckout}>
-            Proceed to Checkout
-          </Button>
+          <div className="text-end">
+            <h4>Total: ₹{calculateTotal()}</h4>
+            {cartItems.length > 0 && (
+              <Button
+                variant="success"
+                className="mt-3"
+                onClick={handleCheckout}
+              >
+                Proceed to Checkout
+              </Button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
+
 Cart.propTypes = {
   user: PropTypes.shape({
     _id: PropTypes.string.isRequired,

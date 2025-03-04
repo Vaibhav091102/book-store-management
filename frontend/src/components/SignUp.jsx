@@ -28,7 +28,7 @@ const SignUp = () => {
         formData
       );
       setMessage({ text: res.data.message, type: "success" });
-      setTimeout(() => navigate("/login"), 2000);
+      setTimeout(() => navigate("/login"), 1000);
     } catch (error) {
       setMessage({
         text: error.response?.data?.message || "Signup failed",

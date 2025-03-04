@@ -68,8 +68,12 @@ router.post("/login", async (req, res) => {
         expiresIn: "1h",
       }
     );
+    let sellerDetails = null;
+    if (user.role === "seller") {
+      sellerDetails = await Seller.findOne({ user_id: user._id }); // Excluding unnecessary fields
+    }
 
-    res.status(200).json({ token, user, Seller });
+    res.status(200).json({ token, user, sellerDetails });
   } catch (err) {
     res.status(500).json({ message: "Server Error" });
   }

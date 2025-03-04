@@ -4,7 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Form, Button, Alert, Container, Card } from "react-bootstrap";
 
-const AddBook = ({ user }) => {
+const AddBook = ({ user, refreshBooks }) => {
   const [bookData, setBookData] = useState({
     name: "",
     author: "",
@@ -58,6 +58,8 @@ const AddBook = ({ user }) => {
         }
       );
       setSuccess("Book uploaded successfully!");
+      // Function to trigger re-fetch
+      refreshBooks();
       setTimeout(() => navigate("/seller/mybook"), 1000);
       setError("");
     } catch (err) {
@@ -189,4 +191,5 @@ AddBook.propTypes = {
   user: PropTypes.shape({
     _id: PropTypes.string.isRequired,
   }).isRequired,
+  refreshBooks: PropTypes.func.isRequired,
 };

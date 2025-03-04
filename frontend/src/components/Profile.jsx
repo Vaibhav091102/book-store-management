@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate, useParams } from "react-router-dom";
+import BackButton from "./BackButton";
 
 export default function Profile() {
   const { id } = useParams();
@@ -18,6 +19,8 @@ export default function Profile() {
 
   const handleLogout = () => {
     localStorage.removeItem("user"); // Remove user from storage
+    localStorage.removeItem("token");
+    window.location.reload();
     navigate("/login");
   };
 
@@ -76,96 +79,99 @@ export default function Profile() {
   }
 
   return (
-    <div className="container mt-5 text-center">
-      {/* Profile Picture */}
-      <img
-        src={"/blank-profile-picture-973460_1280.webp"}
-        alt="Profile"
-        className="rounded-circle mb-3"
-        width="150"
-        height="150"
-      />
+    <>
+      <BackButton />
+      <div className="container  text-center">
+        {/* Profile Picture */}
+        <img
+          src={"/blank-profile-picture-973460_1280.webp"}
+          alt="Profile"
+          className="rounded-circle mb-3"
+          width="150"
+          height="150"
+        />
 
-      {/* Information Table */}
-      <table className="table table-bordered mt-4">
-        <tbody>
-          <tr>
-            <th>Name</th>
-            <td>
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="form-control"
-                />
-              ) : (
-                formData.name
-              )}
-            </td>
-          </tr>
-          <tr>
-            <th>Email</th>
-            <td>{profileData.email}</td>
-          </tr>
-          {profileData.role === "seller" && (
-            <>
-              <tr>
-                <th>Bookstore Name</th>
-                <td>{sellerInfo?.bookstore_name}</td>
-              </tr>
-              <tr>
-                <th>Phone</th>
-                <td>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="form-control"
-                    />
-                  ) : (
-                    sellerInfo?.phone
-                  )}
-                </td>
-              </tr>
-              <tr>
-                <th>Address</th>
-                <td>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      className="form-control"
-                    />
-                  ) : (
-                    sellerInfo?.address
-                  )}
-                </td>
-              </tr>
-            </>
-          )}
-        </tbody>
-      </table>
+        {/* Information Table */}
+        <table className="table table-bordered mt-4">
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <td>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="form-control"
+                  />
+                ) : (
+                  formData.name
+                )}
+              </td>
+            </tr>
+            <tr>
+              <th>Email</th>
+              <td>{profileData.email}</td>
+            </tr>
+            {profileData.role === "seller" && (
+              <>
+                <tr>
+                  <th>Bookstore Name</th>
+                  <td>{sellerInfo?.bookstore_name}</td>
+                </tr>
+                <tr>
+                  <th>Phone</th>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="form-control"
+                      />
+                    ) : (
+                      sellerInfo?.phone
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Address</th>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        className="form-control"
+                      />
+                    ) : (
+                      sellerInfo?.address
+                    )}
+                  </td>
+                </tr>
+              </>
+            )}
+          </tbody>
+        </table>
 
-      {/* Edit/Save Button */}
-      {!isEditing ? (
-        <button className="btn btn-primary m-3" onClick={handleEdit}>
-          Edit Profile
+        {/* Edit/Save Button */}
+        {!isEditing ? (
+          <button className="btn btn-primary m-3" onClick={handleEdit}>
+            Edit Profile
+          </button>
+        ) : (
+          <button className="btn btn-success m-3" onClick={handleSave}>
+            Save Changes
+          </button>
+        )}
+        <button className="btn btn-primary m-3 flex" onClick={handleLogout}>
+          Logout
         </button>
-      ) : (
-        <button className="btn btn-success m-3" onClick={handleSave}>
-          Save Changes
-        </button>
-      )}
-      <button className="btn btn-primary m-3 flex" onClick={handleLogout}>
-        Logout
-      </button>
-    </div>
+      </div>
+    </>
   );
 }
 

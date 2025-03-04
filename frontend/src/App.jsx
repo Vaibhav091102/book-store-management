@@ -16,6 +16,8 @@ import BookDetails from "./components/BookDetails";
 import Cart from "./components/Cart";
 import Confirmation from "./components/Confirmation";
 import SearchPage from "./components/SearchPage";
+import EditBook from "./components/EditBook";
+import AuthorDetails from "./components/AuthorDetails";
 
 const ProtectedRoute = ({ user, role, children }) => {
   if (!user) return <Navigate to="/login" replace />;
@@ -24,6 +26,14 @@ const ProtectedRoute = ({ user, role, children }) => {
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [seller, setSeller] = useState(null);
+  const [bookId, setBookId] = useState(null);
+  const [reload, setReload] = useState(false); // State trigger for re-fetching
+
+  // Function to trigger re-fetch
+  const refreshBooks = () => {
+    setReload((prev) => !prev); // Toggles `reload` to re-trigger `useEffect`
+  };
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -37,7 +47,10 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login setUser={setUser} />} />
+        <Route
+          path="/login"
+          element={<Login setUser={setUser} setSeller={setSeller} />}
+        />
         <Route path="/forget-password" element={<ForgetPassword />} />
         <Route path="/about" element={<About />} />
         {/* Buyer Routes - Protected */}
@@ -59,16 +72,30 @@ export default function App() {
           path="/seller"
           element={
             <ProtectedRoute user={user} role="seller">
-              <SellerHome user={user} />
+              <SellerHome user={user} reload={reload} />
             </ProtectedRoute>
           }
         >
           <Route path="profile/:id" element={<Profile user={user} />} />
-          <Route path="mybook" element={<MyBook user={user} />} />
-          <Route path="add-book/:id" element={<AddBook user={user} />} />
+          <Route
+            path="mybook"
+            element={<MyBook user={user} setBookId={setBookId} />}
+          />
+          <Route
+            path="add-book/:id"
+            element={<AddBook user={user} refreshBooks={refreshBooks} />}
+          />
         </Route>
-        <Route path="/book/:id" element={<BookDetails user={user} />} />
+        <Route
+          path="/book/:bookId"
+          element={<BookDetails user={user} bookId={bookId} seller={seller} />}
+        />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/edit-book/:bookId" element={<EditBook />} />
+        <Route
+          path="/author/:authorName"
+          element={<AuthorDetails user={user} />}
+        />
       </Routes>
     </BrowserRouter>
   );

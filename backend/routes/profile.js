@@ -36,5 +36,39 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 });
+router.put("/update/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, address, phone } = req.body;
+  try {
+    // Update user basic information
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { name },
+      { new: true }
+    );
+
+    // If the user is a seller, update seller information
+    let updatedSeller = null;
+    if (updatedUser.role === "seller") {
+      updatedSeller = await Seller.findOneAndUpdate(
+        { user_id: id },
+        { address, phone },
+        { new: true }
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser,
+      sellerInfo: updatedSeller,
+    });
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update profile" });
+  }
+});
 
 module.exports = router;

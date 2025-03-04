@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const Login = ({ setUser }) => {
+const Login = ({ setUser, setSeller }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState(null);
   const navigate = useNavigate();
@@ -22,10 +22,13 @@ const Login = ({ setUser }) => {
 
       const userData = res.data.user;
       const token = res.data.token;
+      const sellerDetails = res.data.sellerDetails;
+      setSeller(sellerDetails);
       setUser(userData);
 
       localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("token", token);
+      localStorage.setItem("seller", sellerDetails);
       setMessage({ text: "Login successful!", type: "success" });
 
       setTimeout(() => {
@@ -105,6 +108,7 @@ const Login = ({ setUser }) => {
 };
 Login.propTypes = {
   setUser: PropTypes.func.isRequired, // Define that setUser is a required function prop
+  setSeller: PropTypes.func.isRequired,
 };
 
 export default Login;

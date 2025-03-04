@@ -4,28 +4,57 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function BuyerHome({ user }) {
+export default function BuyerHome() {
   const location = useLocation();
   const isDashboard = location.pathname === "/buyer";
   const [books, setBooks] = useState([]);
 
+  const [user, setUser] = useState(null);
+  // const [seller, setSeller] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      setError("User not logged in");
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setError("User not logged in");
+      setLoading(false);
+      return;
+    }
     axios
-      .get(`http://localhost:5000/api/product`)
+      .get(`http://localhost:5000/api/get-all-product`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => {
         const data = res.data.data;
-        setBooks(Array.isArray(data) ? data : []); // Ensure books is always an array
+        // Extract all books from products
+        const books = data.flatMap((product) => product.books || []);
+        setBooks(books);
       })
       .catch((err) => console.error(err));
-  }, [user._id]);
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <>
       <NavBar user={user} />
       {isDashboard ? (
-        <div className="container mt-5">
-          <h2>Welcome to Buyer Dashboard</h2>
-          <div className="container mt-5">
+        <div className="container mt-1">
+          <h2 className="text-center mt-4">Welcome to Buyer Dashboard</h2>
+          <div className="container mt-4">
             {books.length === 0 ? (
               <div className="text-center mt-4">
                 <p>No books found. Please upload one.</p>
@@ -34,7 +63,12 @@ export default function BuyerHome({ user }) {
               <div className="row">
                 {books.map((book) => (
                   <div className="col-md-3 mb-3" key={book._id}>
-                    <div className="card shadow-sm p-3">
+                    <div
+                      className="card h-100 shadow-sm book-card "
+                      style={{
+                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                      }}
+                    >
                       <Link
                         to={`/book/${book._id}`}
                         style={{ textDecoration: "none", color: "black" }}
@@ -52,10 +86,12 @@ export default function BuyerHome({ user }) {
                           className="img-fluid"
                         />
 
-                        <h5 className="mt-2">{book.name}</h5>
+                        <h5 className="m-1">{book.name}</h5>
+                        <p className="m-2 text-muted">{book.author}</p>
+                        <p className="m-2 text-primary fw-bold">
+                          ₹{book.price}
+                        </p>
                       </Link>
-                      <p className="text-muted">{book.author}</p>
-                      <p className="text-primary fw-bold">₹{book.price}</p>
                     </div>
                   </div>
                 ))}
