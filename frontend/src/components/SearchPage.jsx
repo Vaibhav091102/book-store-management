@@ -45,7 +45,7 @@ const SearchPage = () => {
             <input
               type="text"
               className="form-control m-2 rounded-2"
-              placeholder="Search books..."
+              placeholder="Search books or author..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />

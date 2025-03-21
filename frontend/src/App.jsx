@@ -1,3 +1,4 @@
+import "bootstrap/dist/css/bootstrap.min.css";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import SignUp from "./components/SignUp";
@@ -11,7 +12,6 @@ import MyBook from "./Seller/MyBook";
 import Profile from "./components/Profile";
 import ForgetPassword from "./components/ForgetPassword";
 import AddBook from "./Seller/AddBook";
-import "bootstrap/dist/css/bootstrap.min.css";
 import BookDetails from "./components/BookDetails";
 import Cart from "./components/Cart";
 import Confirmation from "./components/Confirmation";
@@ -29,6 +29,7 @@ export default function App() {
   const [seller, setSeller] = useState(null);
   const [bookId, setBookId] = useState(null);
   const [reload, setReload] = useState(false); // State trigger for re-fetching
+  const [cartLength, setCartLength] = useState(0);
 
   // Function to trigger re-fetch
   const refreshBooks = () => {
@@ -49,7 +50,13 @@ export default function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route
           path="/login"
-          element={<Login setUser={setUser} setSeller={setSeller} />}
+          element={
+            <Login
+              setUser={setUser}
+              setSeller={setSeller}
+              setCartLength={setCartLength}
+            />
+          }
         />
         <Route path="/forget-password" element={<ForgetPassword />} />
         <Route path="/about" element={<About />} />
@@ -58,13 +65,16 @@ export default function App() {
           path="/buyer"
           element={
             <ProtectedRoute user={user} role="buyer">
-              <BuyerHome user={user} />
+              <BuyerHome user={user} cartLength={cartLength} />
             </ProtectedRoute>
           }
         >
           <Route path="profile/:id" element={<Profile user={user} />} />
           <Route path="mybooks" element={<MyBook user={user} />} />
-          <Route path="cart" element={<Cart user={user} />} />
+          <Route
+            path="cart"
+            element={<Cart user={user} setCartLength={setCartLength} />}
+          />
         </Route>
         <Route path="/confirmation" element={<Confirmation />} />
         {/* Seller Routes */}
@@ -88,7 +98,14 @@ export default function App() {
         </Route>
         <Route
           path="/book/:bookId"
-          element={<BookDetails user={user} bookId={bookId} seller={seller} />}
+          element={
+            <BookDetails
+              user={user}
+              bookId={bookId}
+              seller={seller}
+              cartLength={cartLength}
+            />
+          }
         />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/edit-book/:bookId" element={<EditBook />} />

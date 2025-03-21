@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const Login = ({ setUser, setSeller }) => {
+const Login = ({ setUser, setSeller, setCartLength }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState(null);
+  const [user, setLocalUser] = useState(null); // ✅ Local user state to track the logged-in user
   const navigate = useNavigate();
 
   const HandleChange = (e) => {
@@ -23,12 +24,14 @@ const Login = ({ setUser, setSeller }) => {
       const userData = res.data.user;
       const token = res.data.token;
       const sellerDetails = res.data.sellerDetails;
+
       setSeller(sellerDetails);
       setUser(userData);
+      setLocalUser(userData); // ✅ Store the logged-in user locally
 
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("token", token);
-      localStorage.setItem("seller", sellerDetails);
+      localStorage.setItem("seller", JSON.stringify(sellerDetails));
       setMessage({ text: "Login successful!", type: "success" });
 
       setTimeout(() => {
@@ -45,6 +48,21 @@ const Login = ({ setUser, setSeller }) => {
       });
     }
   };
+
+  // ✅ Fetch cart length only after the user is set
+  useEffect(() => {
+    if (user?._id) {
+      axios
+        .get(`http://localhost:5000/api/cart/${user._id}`)
+        .then((res) => {
+          const formattedItems = Array.isArray(res.data.cart)
+            ? res.data.cart
+            : [];
+          setCartLength(formattedItems.length);
+        })
+        .catch((err) => console.error("Error fetching cart:", err));
+    }
+  }, [user, setCartLength]); // ✅ Trigger effect when `user` changes
 
   return (
     <div className="container mt-5">
@@ -106,9 +124,11 @@ const Login = ({ setUser, setSeller }) => {
     </div>
   );
 };
+
 Login.propTypes = {
-  setUser: PropTypes.func.isRequired, // Define that setUser is a required function prop
-  setSeller: PropTypes.func.isRequired,
+  setUser: PropTypes.func.isRequired, // ✅ Function to set user
+  setSeller: PropTypes.func.isRequired, // ✅ Function to set seller
+  setCartLength: PropTypes.func.isRequired, // ✅ Function to set cart length
 };
 
 export default Login;

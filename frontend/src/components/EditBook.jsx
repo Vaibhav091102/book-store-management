@@ -8,8 +8,9 @@ const EditBook = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
 
-  // Initially, set book to null instead of empty values
   const [book, setBook] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [preview, setPreview] = useState("");
 
   useEffect(() => {
     const fetchBookDetails = async () => {
@@ -17,8 +18,12 @@ const EditBook = () => {
         const response = await axios.get(
           `http://localhost:5000/api/single-product-details/${bookId}`
         );
+        setBook(response.data.data);
 
-        setBook(response.data.data); // Set book data properly
+        // Set preview for existing image
+        if (response.data.data?.image) {
+          setPreview(`http://localhost:5000/${response.data.data.image}`);
+        }
       } catch (error) {
         console.error("Error fetching book:", error);
       }
@@ -26,17 +31,42 @@ const EditBook = () => {
     fetchBookDetails();
   }, [bookId]);
 
-  // Handle change for input fields
+  // Handle form inputs
   const handleChange = (e) => {
     setBook({ ...book, [e.target.name]: e.target.value });
   };
 
+  // Handle image file change
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    formData.append("name", book.name);
+    formData.append("author", book.author);
+    formData.append("price", book.price);
+    formData.append("publishedYear", book.publishedYear);
+    formData.append("availableCopies", book.availableCopies);
+    formData.append("publisher", book.publisher);
+    formData.append("summary", book.summary);
+
+    if (selectedImage) {
+      formData.append("image", selectedImage);
+    }
+
     try {
       await axios.put(
         `http://localhost:5000/api/products/update/${bookId}`,
-        book
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
       alert("Book updated successfully!");
       navigate("/seller/mybook");
@@ -46,7 +76,6 @@ const EditBook = () => {
     }
   };
 
-  // **Prevent rendering form before data is loaded**
   if (!book) {
     return <h3 className="text-center mt-5">Loading book details...</h3>;
   }
@@ -56,7 +85,7 @@ const EditBook = () => {
       <BackButton />
       <div className="card shadow-lg p-4">
         <h2 className="text-center mb-4">Edit Book</h2>
-        <form onSubmit={handleUpdate}>
+        <form onSubmit={handleUpdate} encType="multipart/form-data">
           <div className="mb-3">
             <label className="form-label">Name</label>
             <input
@@ -141,6 +170,29 @@ const EditBook = () => {
               rows="3"
             ></textarea>
           </div>
+
+          {/* Image Upload */}
+          <div className="mb-3">
+            <label className="form-label">Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="form-control"
+            />
+          </div>
+
+          {/* Image Preview */}
+          {preview && (
+            <div className="mb-3 text-center">
+              <img
+                src={preview}
+                alt="Preview"
+                style={{ maxWidth: "200px", maxHeight: "200px" }}
+                className="img-thumbnail"
+              />
+            </div>
+          )}
 
           <div className="text-center">
             <button type="submit" className="btn btn-primary px-4">

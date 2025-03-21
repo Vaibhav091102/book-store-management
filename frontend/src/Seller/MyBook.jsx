@@ -59,9 +59,9 @@ const MyBook = ({ user }) => {
                       alt={book.name}
                       className="img-fluid"
                     />
-                    <h5 className="mt-2">{book.name}</h5>
-                    <p className="text-muted">{book.author}</p>
-                    <p className="text-primary fw-bold">₹{book.price}</p>
+                    <h5 className="m-1">{book.name}</h5>
+                    <p className="m-2 text-muted">{book.author}</p>
+                    <p className="m-2 text-primary fw-bold">₹{book.price}</p>
                   </Link>
                 </div>
               </div>

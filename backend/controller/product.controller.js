@@ -24,6 +24,7 @@ const createProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const product = req.body;
+
     let book = await Product.findOne({ user_id: id });
 
     if (!product.name || !product.price || !req.file) {
@@ -37,17 +38,19 @@ const createProduct = async (req, res) => {
       book = new Product({ user_id: id, books: [] });
     }
 
+    // Add image path to the product
     const newProduct = {
       ...product,
-      image: req.file.path,
+      image: req.file.path, // Save image path
     };
+
     book.books.push(newProduct);
 
     await book.save();
-    res.status(201).json({ sucess: true, data: newProduct });
+    res.status(201).json({ success: true, data: newProduct });
   } catch (error) {
     console.error("Error in Create product:", error.message);
-    res.status(500).json({ sucess: false, message: "Server Error" });
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
@@ -98,23 +101,33 @@ const updateProduct = async (req, res) => {
 
   try {
     const product = await Product.findOne({ "books._id": bookId });
-    if (!product)
+
+    if (!product) {
       return res
         .status(404)
         .json({ success: false, message: "Product not found" });
+    }
 
     const bookIndex = product.books.findIndex(
       (b) => b._id.toString() === bookId
     );
-    if (bookIndex === -1)
+
+    if (bookIndex === -1) {
       return res
         .status(404)
         .json({ success: false, message: "Book not found" });
+    }
 
-    // Update book fields
+    // If a new image is uploaded, replace the existing image
+    if (req.file) {
+      updatedBook.image = req.file.path; // Save the new image path
+    }
+
+    // Merge updated fields with the existing book
     product.books[bookIndex] = { ...product.books[bookIndex], ...updatedBook };
 
     await product.save();
+
     res
       .status(200)
       .json({ success: true, message: "Book updated successfully" });

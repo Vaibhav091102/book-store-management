@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import BackButton from "./BackButton";
 
-export default function Cart({ user }) {
+export default function Cart({ user, setCartLength }) {
   const [cartItems, setCartItems] = useState([]);
   const navigate = useNavigate(); // ✅ Initialize navigation
 
@@ -13,6 +13,7 @@ export default function Cart({ user }) {
     try {
       await axios.delete(`http://localhost:5000/api/cart/clearall/${user._id}`);
       setCartItems([]);
+      setCartLength(0);
       navigate("/confirmation"); // ✅ Redirect to confirmation page
     } catch (error) {
       console.error("Error during checkout:", error);
@@ -29,11 +30,11 @@ export default function Cart({ user }) {
             ? res.data.cart
             : [];
           setCartItems(formattedItems);
+          setCartLength(formattedItems.length);
         })
         .catch((err) => console.error("Error fetching cart:", err));
     }
-  }, [user?._id]);
-  console.log(cartItems);
+  }, [user?._id, setCartLength]);
 
   //Quality change
   const handleQuantityChange = async (bookId, delta, availableCopies) => {
@@ -71,9 +72,13 @@ export default function Cart({ user }) {
       await axios.delete(
         `http://localhost:5000/api/cart/clear/${user._id}/${bookId}`
       );
-      setCartItems((prevItems) =>
-        prevItems.filter((item) => item.book?._id !== bookId)
-      );
+      setCartItems((prevItems) => {
+        const updatedCart = prevItems.filter(
+          (item) => item.book?._id !== bookId
+        );
+        setCartLength(updatedCart.length); // ✅ Update cart length
+        return updatedCart;
+      });
     } catch (err) {
       console.error("Error removing item:", err);
     }
@@ -215,4 +220,5 @@ Cart.propTypes = {
   user: PropTypes.shape({
     _id: PropTypes.string.isRequired,
   }).isRequired,
+  setCartLength: PropTypes.func.isRequired,
 };

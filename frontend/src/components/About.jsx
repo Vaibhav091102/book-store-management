@@ -1,10 +1,12 @@
 import Footer from "./footer";
 import NavBar from "./NavBar";
+import BackButton from "./BackButton";
 
 const AboutUs = () => {
   return (
     <>
       <NavBar />
+      <BackButton />
       <div className="container mt-5">
         {/* About Us Section */}
         <div className="text-center mb-4">

@@ -16,6 +16,6 @@ router.post("/:id", upload.single("image"), createProduct);
 
 router.delete("/delete-book/:bookId", deleteProduct);
 
-router.put("/update/:bookId", updateProduct);
+router.put("/update/:bookId", upload.single("image"), updateProduct);
 
 module.exports = router;

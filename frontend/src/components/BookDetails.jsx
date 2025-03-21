@@ -7,7 +7,7 @@ import NavBarB from "../buyer/NavBarB";
 import NavBar from "../Seller/NavBar";
 import BackButton from "./BackButton";
 
-const BookDetails = ({ user, seller }) => {
+const BookDetails = ({ user, seller, cartLength }) => {
   const { bookId } = useParams();
   const [book, setBook] = useState(null);
   const navigate = useNavigate();
@@ -18,8 +18,6 @@ const BookDetails = ({ user, seller }) => {
         userId: user._id,
         productId: book.productId,
         bookId: book._id,
-        // bookName: book.name,
-        // bookPrice: book.price,
         quantity: 1,
       });
 
@@ -71,7 +69,7 @@ const BookDetails = ({ user, seller }) => {
   return (
     <>
       {user && user.role === "buyer" ? (
-        <NavBarB user={user} />
+        <NavBarB user={user} cartLength={cartLength} />
       ) : (
         <NavBar user={user} />
       )}
@@ -158,4 +156,5 @@ BookDetails.propTypes = {
   }).isRequired,
   bookId: PropTypes.string.isRequired,
   seller: PropTypes.func.isRequired,
+  cartLength: PropTypes.number.isRequired,
 };

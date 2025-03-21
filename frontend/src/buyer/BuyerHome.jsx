@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function BuyerHome() {
+export default function BuyerHome({ cartLength }) {
   const location = useLocation();
   const isDashboard = location.pathname === "/buyer";
   const [books, setBooks] = useState([]);
@@ -50,7 +50,7 @@ export default function BuyerHome() {
 
   return (
     <>
-      <NavBar user={user} />
+      <NavBar user={user} cartLength={cartLength} />
       {isDashboard ? (
         <div className="container mt-1">
           <h2 className="text-center mt-4">Welcome to Buyer Dashboard</h2>
@@ -71,7 +71,7 @@ export default function BuyerHome() {
                     >
                       <Link
                         to={`/book/${book._id}`}
-                        style={{ textDecoration: "none", color: "black" }}
+                        className="text-decoration-none text-dark m-2"
                       >
                         <img
                           src={
@@ -102,6 +102,14 @@ export default function BuyerHome() {
       ) : (
         <Outlet />
       )}
+      <style>
+        {`
+          .book-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+          }
+        `}
+      </style>
     </>
   );
 }
@@ -113,4 +121,5 @@ BuyerHome.propTypes = {
     name: PropTypes.string.isRequired,
     role: PropTypes.string.isRequired,
   }).isRequired,
+  cartLength: PropTypes.number.isRequired,
 };
